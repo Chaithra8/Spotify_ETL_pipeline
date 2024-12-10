@@ -24,4 +24,8 @@ Project workflow is mentioned below:
 5. Glue job contains logic to transform raw data, generate 3 parquet files (album, artist and songs data) and store them to another S3 folder(transformed_data/) under separate sub-folder for each file. Once the transformation is completed, it moves the raw data(.json) from "raw_data/to_process" folder to "raw_data/processed" folder of S3 bucket to avoid re-computation of same files.
 6. Once the files are uploaded to "transformed" folder of S3 bucket, Snowpipe is triggered via SQS queue.
 7. S3 data is referenced using snowflake's external stages created for each sub-folder(album, artist, song) present under "transformed_data/" folder and 3 snowpipes are created to copy data from external stage to snowflake table.
-9. Upon trigger, Snowpipe automatically loads transformed data from S3 to Snowflake tables. 
+9. Upon trigger, Snowpipe automatically loads transformed data from S3 to Snowflake tables.
+
+**For more detailed steps, please go through below link - **
+
+[Link to my medium blog](https://medium.com/@spchaithrajp/spotify-etl-pipeline-aws-pyspark-snowflake-46c25fb69f95)
