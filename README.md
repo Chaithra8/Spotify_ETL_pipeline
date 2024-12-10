@@ -12,15 +12,16 @@ AWS is chosen as the main cloud platform, services used to accomplish this proje
   - AWS Glue (Pyspark)
   - Amazon EventBridge
   - AWS Cloudwatch
-  - S3 event notification (SQS Queue)
+  - Amazon SQS (S3 event notification)
   - Snowflake
   - Snowpipe
 
 Project workflow is mentioned below:
-1. Spotify playlist data is extracted using AWS lamdba function via spotify API. This function is scheduled to run every day using EventBrige.
-2. Extracted data is stored in S3 bucket(raw_data)
+1. Spotify playlist data is extracted using AWS lamdba function via spotify API. This function is scheduled to run every day using EventBridge.
+2. Extracted data is stored in S3 bucket(raw_data) as json file.
 3. Upon loading the raw files to S3 another lamdba function is triggered.
-4. This lamdba function starts glue jobs written with the help of PySpark.
-5. Glue job contains logic to transform raw data, generate 3 parquet files (album, artist and songs data) and store it onto another S3 folder(transformed_data). Once the transformation is completed it moves the raw data from "raw_data/to_process" folder to "raw_data/processed" folder of S3 bucket to avoid re-computation of same files.
-6. Once the files are uploaded to "transformed" folder of S3 bucketSnowpipe.
-7. Snowpipe loads transformed data from S3 to Snowflake tables.
+4. This lamdba function starts glue jobs written in PySpark.
+5. Glue job contains logic to transform raw data, generate 3 parquet files (album, artist and songs data) and store them to another S3 folder(transformed_data/) under separate sub-folder for each file. Once the transformation is completed, it moves the raw data(.json) from "raw_data/to_process" folder to "raw_data/processed" folder of S3 bucket to avoid re-computation of same files.
+6. Once the files are uploaded to "transformed" folder of S3 bucket, Snowpipe is triggered via SQS queue.
+7. S3 data is referenced using snowflake's external stages created for each sub-folder(album, artist, song) present under "transformed_data/" folder and 3 snowpipes are created to copy data from external stage to snowflake table.
+9. Upon trigger, Snowpipe automatically loads transformed data from S3 to Snowflake tables. 
